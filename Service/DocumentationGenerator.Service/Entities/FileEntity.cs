@@ -7,7 +7,7 @@ namespace DocumentationGenerator.Service.Entities;
 public class FileEntity
 {
     [Column("ID")]
-    public Guid id { get; set; }
+    public Guid Id { get; set; }
 
     [Column("CREATE_AT")]
     public DateTime CreatedAt { get; set; }

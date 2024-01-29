@@ -1,5 +1,6 @@
 using DocumentationGenerator.Service.Constants;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DocumentationGenerator.Service.Entities;
 
@@ -19,6 +20,9 @@ public class DatabaseContext : DbContext
                     .HasConversion(
                         s => s.ToString(),
                         s => (FileStatus)Enum.Parse(typeof(FileStatus), s));
+
+                entity.Property(e => e.Id)
+                    .HasConversion(new GuidToStringConverter());
 
                 entity.Property(e => e.CreatedAt)
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
