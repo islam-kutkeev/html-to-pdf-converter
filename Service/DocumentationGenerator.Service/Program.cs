@@ -1,3 +1,4 @@
+using DocumentationGenerator.Service.Configurations;
 using DocumentationGenerator.Service.Entities;
 using DocumentationGenerator.Service.Services.FileManagerService;
 using DocumentationGenerator.Service.Services.GeneratorService;
@@ -11,6 +12,9 @@ builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlite(buil
 // Services
 builder.Services.AddTransient<IFileManagerService, CustomFileManagerService>();
 builder.Services.AddSingleton<IGeneratorService, CustomerGeneratorService>();
+
+// Mapper
+builder.Services.AddAutoMapper(typeof(FileMapperProfile));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
