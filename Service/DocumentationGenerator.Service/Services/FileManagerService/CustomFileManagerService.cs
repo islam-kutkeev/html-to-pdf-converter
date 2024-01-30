@@ -34,6 +34,7 @@ public class CustomFileManagerService : IFileManagerService
     {
         if (file == null || file.Length == 0)
         {
+            _logger.LogDebug("Provided file was empty");
             throw new ArgumentNullException();
         }
 
@@ -49,6 +50,7 @@ public class CustomFileManagerService : IFileManagerService
         // Check file's extension
         if (!fileExtension.Equals(".html"))
         {
+            _logger.LogWarning("Provided file has invalid extension: {ext}", fileExtension);
             throw new FormatException();
         }
 

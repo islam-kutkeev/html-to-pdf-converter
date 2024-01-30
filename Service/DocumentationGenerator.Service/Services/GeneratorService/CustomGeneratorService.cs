@@ -25,6 +25,8 @@ public class CustomGeneratorService : IGeneratorService
         {
             try
             {
+                _logger.LogDebug("Start convert process for file {id}", file.Id);
+
                 // Change status of file so that other workers don't use the object
                 file.Status = FileStatus.InProgress;
                 await _dbContext.SaveChangesAsync();
