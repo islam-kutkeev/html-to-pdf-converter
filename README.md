@@ -53,7 +53,7 @@ This project is a web api application that allows users to convert HTML files to
 
 ### Frontend
 
-1. Open the `frontend` folder in a new terminal.
+1. Open the `Client/documentation-client` folder in a new terminal.
 2. Install dependencies by running:
 
     ```bash
