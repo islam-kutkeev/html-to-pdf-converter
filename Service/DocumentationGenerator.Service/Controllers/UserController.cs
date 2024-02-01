@@ -1,6 +1,8 @@
+using DocumentationGenerator.Service.Configurations;
 using DocumentationGenerator.Service.Dtos;
 using DocumentationGenerator.Service.Services.FileManagerService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DocumentationGenerator.Service.Controllers;
 
@@ -10,12 +12,14 @@ public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
     private readonly IFileManagerService _fileManager;
+    private readonly IHubContext<DataHub> _hub;
 
 
-    public UserController(ILogger<UserController> logger, IFileManagerService fileManager)
+    public UserController(ILogger<UserController> logger, IFileManagerService fileManager, IHubContext<DataHub> hub)
     {
         _logger = logger;
         _fileManager = fileManager;
+        _hub = hub;
     }
 
     [HttpGet("/get-all")]
@@ -55,23 +59,28 @@ public class UserController : ControllerBase
             _logger.LogError(ex, result.Message);
         }
 
+        await _hub.Clients.All.SendAsync("FilesInformation", await _fileManager.GetAllFilesAsync());
         return result;
     }
 
     [HttpDelete("/delete/{id}")]
     public async Task<ResponseDto> DeleteExistingFile(string id)
     {
+        var result = new ResponseDto();
         try
         {
             await _fileManager.DeleteFileAsync(id);
-            return new ResponseDto();
         }
         catch (Exception ex)
         {
             string message = String.Format("Error occurred while trying to delete file at server with id: {id}", id);
             _logger.LogError(ex, message);
-            return new ResponseDto<FileDto>(5, message, null);
+            result.Code = 5;
+            result.Message = message;
         }
+
+        await _hub.Clients.All.SendAsync("FilesInformation", await _fileManager.GetAllFilesAsync());
+        return result;
     }
 
     [HttpGet("/download/{id}")]
@@ -79,7 +88,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            var fileInfo = await _fileManager.ObtainFileAsync(id, ".html");
+            var fileInfo = await _fileManager.ObtainFileAsync(id, ".pdf");
             if (fileInfo == null)
             {
                 throw new ArgumentNullException(nameof(fileInfo));

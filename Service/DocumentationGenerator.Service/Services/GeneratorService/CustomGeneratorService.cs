@@ -1,6 +1,9 @@
+using AutoMapper;
+using DocumentationGenerator.Service.Configurations;
 using DocumentationGenerator.Service.Constants;
 using DocumentationGenerator.Service.Dtos;
 using DocumentationGenerator.Service.Entities;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PuppeteerSharp;
 
@@ -10,11 +13,15 @@ public class CustomGeneratorService : IGeneratorService
 {
     private ILogger<CustomGeneratorService> _logger;
     private readonly DatabaseContext _dbContext;
+    private readonly IMapper _mapper;
+    private readonly IHubContext<DataHub> _hub;
 
-    public CustomGeneratorService(ILogger<CustomGeneratorService> logger, DatabaseContext dbContext)
+    public CustomGeneratorService(ILogger<CustomGeneratorService> logger, DatabaseContext dbContext, IMapper mapper, IHubContext<DataHub> hub)
     {
         _logger = logger;
         _dbContext = dbContext;
+        _mapper = mapper;
+        _hub = hub;
     }
 
     public async Task GenerateFileProcessAsync()
@@ -45,6 +52,9 @@ public class CustomGeneratorService : IGeneratorService
             _dbContext.Entry(file).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
+
+        var updatedFiles = await _dbContext.Files.ToListAsync();
+        await _hub.Clients.All.SendAsync("FilesInformation", _mapper.Map<List<FileDto>>(updatedFiles));
     }
 
     private async Task ConvertHtmlToPdfAsync(FileEntity fileDetail)

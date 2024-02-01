@@ -18,6 +18,7 @@ builder.Services.AddTransient<IGeneratorService, CustomGeneratorService>();
 builder.Services.AddAutoMapper(typeof(FileMapperProfile));
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,10 +33,20 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+
+app.UseCors(builder => builder
+    .WithOrigins("http://localhost:3000")
+    .AllowAnyHeader()
+    .AllowAnyMethod());
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<DataHub>("/files-hub");
 
 app.Run();
